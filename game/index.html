@@ -62,7 +62,7 @@ case'KeyL':KY.s2=d?1:0;if(d)IN.s2P=1;break;case'KeyU':KY.u=d?1:0;if(d)IN.uP=1;br
 case'ShiftLeft':case'ShiftRight':if(d)IN.dP=1;break;case'KeyQ':if(d)IN.pP=1;break;
 case'Escape':case'KeyP':if(d&&!e.repeat)tglP();break;case'KeyR':if(d&&!e.repeat)startRun();break;default:u=0}
 if(u&&e.preventDefault)e.preventDefault();
-if(d&&!e.repeat){initA();if(G.md==='t'&&!G.ov)uiC(-1,-1,'st');else if(G.md==='d'||G.md==='w')uiC(-1,-1,'rt')}}
+if(d&&!e.repeat){initA();if(G.md==='t'&&!G.ov)uiC(-1,-1,'st');else if(G.md==='dead'||G.md==='win')uiC(-1,-1,'rt')}}
 window.addEventListener('keydown',function(e){onK(e,1)});window.addEventListener('keyup',function(e){onK(e,0)});
 
 var SK='dnf_mini_v1';
@@ -139,7 +139,7 @@ function eqSum(){var s={atk:0,hp:0,mp:0,crit:0,dr:0},k,p,g;for(k in P.eq){g=P.eq
 function gtxt(s){var a=[];if(s.atk)a.push('攻+'+s.atk);if(s.hp)a.push('血+'+s.hp);if(s.mp)a.push('蓝+'+s.mp);if(s.crit)a.push('暴+'+s.crit+'%');if(s.dr)a.push('防+'+s.dr+'%');return a.join(' ')}
 var BUFFS=[{id:'atk',n:'狂怒',d:'攻击+15%',ic:'#ff8a5c',s:{dmg:.15}},{id:'spd',n:'疾风',d:'移速+12%',ic:'#7bdcff',s:{spd:.12}},{id:'crit',n:'鹰眼',d:'暴击+8%',ic:'#ffd166',s:{crit:.08}},{id:'critd',n:'致命',d:'暴伤+30%',ic:'#ff6b9d',s:{critd:.30}},{id:'hp',n:'生命',d:'生命+35并治疗',ic:'#7bff8a',s:{hp:35}},{id:'dr',n:'铁壁',d:'减伤+10%',ic:'#c9c2e8',s:{dr:.10}},{id:'ls',n:'嗜血',d:'回血+1.5',ic:'#ff6b6b',s:{ls:1.5}},{id:'cdr',n:'急冷',d:'CD-12%',ic:'#9db4ff',s:{cdr:.12}},{id:'rng',n:'范围',d:'范围+15%',ic:'#ffb15e',s:{range:.15}},{id:'gold',n:'贪婪',d:'金币+30%',ic:'#ffe08a',s:{gold:.30}}];
 
-var G={md:'t',ov:null,rm:0,tm:0,shT:0,shM:0,hs:0,fl:0,tr:null,bn:null,bi:0,dT:0,wT:0,rc:[],pr:0,ht:0};
+var G={md:'t',ov:null,rm:0,tm:0,shT:0,shM:0,hs:0,fl:0,tr:null,bn:null,bi:0,dT:0,wT:0,rc:[],pr:0,ht:0,wave:0,waveMax:1,waveT:0,wavePer:0};
 var cam={x:0};
 var plats=[],ens=[],shots=[],loots=[],parts=[],texts=[],sls=[],beams=[],arcs=[],decs=[],port=null,eid=0;
 var P={x:0,y:0,w:30,h:52,vx:0,vy:0,fc:1,og:0,an:0,hp:100,mhp:100,mp:60,mmp:100,ex:0,nx:20,lv:1,gold:0,kl:0,cb:0,cbT:0,ch:0,jp:2,ac:null,at:12,aT:0,iv:0,dd:0,dy:0,cd:[0,0,0],dc:0,po:3,sw:null,cs:null,huT:0,cr:.05,cd2:1.7,dm:1,cdM:1,spM:1,rgM:1,ls:0,dr:0,gdM:1,job:'blade',sk:null,bf:[],eq:{weapon:null,head:null,body:null,ring:null}};
@@ -161,15 +161,22 @@ var T=thOf(i),k,q,x,end=isEnd(i),lay=end?layOf(i):0,sc=1+lay*.22;roomW=Math.max(
 plats.push({x:0,y:GROUND,w:roomW,h:H-GROUND+20,gr:1});var n=rndi(2,3);
 for(k=0;k<n;k++){var pw=rndi(150,250);plats.push({x:rnd(220,roomW-pw-260),y:GROUND-rndi(130,270),w:pw,h:22,gr:0})}
 decs=[];for(x=140;x<roomW-160;x+=rnd(250,420))decs.push({x:x,y:GROUND-4,t:T.dc,p:rnd(0,9),s:rnd(.85,1.25)});
-if(i===ROOMS-1){var b=spE('boss',roomW-320,GROUND-ET.boss.h);b.st='enter';b.stT=1;b.fc=-1;b.bs=1;
-for(q=0;q<3;q++)spE('elite',roomW-150-q*90,GROUND-ET.elite.h);bn('最终 BOSS','暗黑城主 · 玛尔斯');SFX.boss();G.bi=2}
-else if(!end&&T.mb){var m=spE('boss2',roomW-300,GROUND-ET.boss2.h);m.st='enter';m.stT=.9;m.fc=-1;m.bs=1;
-for(q=0;q<2;q++){var at=pick(T.fo);spE(at,roomW-140-q*80,GROUND-ET[at].h)}bn('领主出现','巨魔领主 · 戈隆');SFX.boss();G.bi=1.6}
-else{var c=Math.min(8,3+Math.floor(i*1.1)),ct;for(c=0;c<count_();c++){ct=pick(T.fo);spE(ct,rnd(340,roomW-220),GROUND-ET[ct].h,sc)}
-bn(end?('无尽第 '+lay+' 层'):T.n,end?'层数越深，怪物越强':(rmName(i)+' · 消灭怪物开启传送门'))}
-port={x:roomW-120,y:GROUND-52,w:64,h:52,t:0,act:0};
+G.wave=0;G.waveT=0;G.waveMax=waveCount(i);G.wavePer=Math.max(3,Math.ceil(count_()/G.waveMax));
+port={x:roomW-120,y:GROUND-52,w:64,h:52,t:0,act:0};spawnWave()
 P.x=70;P.y=GROUND-P.h;P.vx=0;P.vy=0;P.fc=1;P.jp=2;P.hp=Math.min(P.mhp,P.hp+P.mhp*.12);cam.x=0;G.ht=4}
-function count_(){return Math.min(8,3+Math.floor(G.rm*1.1))}
+function count_(){return Math.min(16,6+Math.floor(G.rm*1.4))}
+function waveCount(i){if(i===ROOMS-1)return 3;if(!isEnd(i)&&thOf(i).mb)return 3;if(isEnd(i))return 3+Math.min(3,Math.floor(layOf(i)/2));return 2+Math.floor(i/3)}
+function spawnWave(){var i=G.rm,T=thOf(i),end=isEnd(i),lay=end?layOf(i):0,sc=1+lay*.22,w=G.wave,q,t;
+if(i===ROOMS-1){
+if(w===0){var b=spE('boss',roomW-320,GROUND-ET.boss.h);b.st='enter';b.stT=1;b.fc=-1;b.bs=1;for(q=0;q<3;q++)spE('elite',roomW-150-q*90,GROUND-ET.elite.h);bn('最终 BOSS','暗黑城主 · 玛尔斯');SFX.boss();G.bi=2}
+else{for(q=0;q<2+w;q++){t=pick(['elite','brute','shield','elite']);spE(t,cl(rnd(340,roomW-220),40,roomW-60),GROUND-ET[t].h,sc)}bn('第 '+(w+1)+' 波','BOSS 召唤了援军');SFX.boss()}
+return}
+if(!end&&T.mb){
+if(w===0){var m=spE('boss2',roomW-300,GROUND-ET.boss2.h);m.st='enter';m.stT=.9;m.fc=-1;m.bs=1;for(q=0;q<2;q++){var at=pick(T.fo);spE(at,roomW-140-q*80,GROUND-ET[at].h)}bn('领主出现','巨魔领主 · 戈隆');SFX.boss();G.bi=1.6}
+else{for(q=0;q<2+w;q++){t=pick(T.fo);spE(t,rnd(340,roomW-220),GROUND-ET[t].h,sc)}bn('第 '+(w+1)+' 波','援军来袭！');SFX.boss()}
+return}
+for(q=0;q<G.wavePer;q++){t=pick(T.fo);spE(t,rnd(340,roomW-220),GROUND-ET[t].h,sc)}
+bn(w===0?(end?('无尽第 '+lay+' 层'):T.n):('第 '+(w+1)+'/'+G.waveMax+' 波'),w===0?(end?'层数越深，怪物越强':(rmName(i)+' · 共 '+G.waveMax+' 波敌人')):'继续战斗！')}
 function bn(t,s){G.bn={t:t,s:s,lf:2.6}}
 
 function shk(m){if(S.set.shake){G.shT=.22;G.shM=m}}
@@ -329,7 +336,9 @@ function upd(dt){if(G.bi>0)G.bi-=dt;if(G.ht>0)G.ht-=dt;if(G.bn){G.bn.lf-=dt;if(G
 if(P.ac==='dash')dshU(P);
 if(G.tr){var tr=G.tr;tr.t+=dt;if(tr.ph==='out'&&tr.t>=.45){G.rm=tr.rm;genR(G.rm);tr.ph='in';tr.t=0}else if(tr.ph==='in'&&tr.t>=.45){G.tr=null}upFx(dt);return}
 upP(dt);for(var i=0;i<ens.length;i++)upE(ens[i],dt);upSh(dt);upBm(dt);upLt(dt);upFx(dt);
-if(port){port.t+=dt;var al=0;for(var a=0;a<ens.length;a++)if(!ens[a].dy)al++;port.act=(al===0);
+if(port){port.t+=dt;var al=0;for(var a=0;a<ens.length;a++)if(!ens[a].dy)al++;
+if(al===0&&G.wave<G.waveMax-1){if(G.waveT<=0)G.waveT=1.8;G.waveT-=dt;if(G.waveT<=0){G.wave++;spawnWave()}port.act=0}
+else port.act=(al===0);
 if(port.act&&aabb(P,port)&&!G.tr&&!G.ov){if(G.rm>=ROOMS-1){G.wT=0}opRw()}}
 if(G.wT>0){G.wT-=dt;if(G.wT<=0){if(!isEnd(G.rm)){G.md='win';S.best.clear=1;if(P.lv>S.best.level)S.best.level=P.lv;if(P.kl>S.best.kills)S.best.kills=P.kl;if(P.gold>S.best.gold)S.best.gold=P.gold;save()}}}
 var tg=cl(P.x+P.w/2-W/2+P.fc*60,0,Math.max(0,roomW-W));cam.x+=(tg-cam.x)*Math.min(1,dt*8);cam.x=cl(cam.x,0,Math.max(0,roomW-W))}
@@ -439,7 +448,7 @@ function lyP(){PB=[];var w=200,h=38,x=(W-w)/2,y=H*.30;PB.push({x:x,y:y,w:w,h:h,i
 function lyR(){RB=[];var n=3,cw=Math.min(150,(W-40)/n-10),ch=Math.min(190,H*.40),x0=(W-(n*cw+(n-1)*10))/2,y=H*.28;for(var i=0;i<n;i++)RB.push({x:x0+i*(cw+10),y:y,w:cw,h:ch,id:'c'+i})}
 function lyO(){OB=[];var bw=200,bh=42;OB.push({x:(W-bw)/2,y:H*.58,w:bw,h:bh,id:'retry'});OB.push({x:(W-bw)/2,y:H*.58+50,w:bw,h:bh,id:'title'})}
 function tglP(){if(G.md==='play'&&!G.tr)G.ov=(G.ov==='pause')?null:'pause';else if(G.ov==='pause')G.ov=null}
-function uiC(x,y,fo){if(fo==='st'){if(G.md==='t'&&!G.ov)startRun();return}if(fo==='rt'){if(G.md==='d'||G.md==='w')startRun();return}if(x<0)return;var i;
+function uiC(x,y,fo){if(fo==='st'){if(G.md==='t'&&!G.ov)startRun();return}if(fo==='rt'){if(G.md==='dead'||G.md==='win')startRun();return}if(x<0)return;var i;
 if(G.ov==='tree'){lyTr();for(i=0;i<TRB.length;i++)if(inR(TRB[i],x,y)){var nd=null,j;for(j=0;j<TREE.length;j++)if(TREE[j].id===TRB[i].id)nd=TREE[j];if(nd&&tlv(nd.id)<nd.max&&avP()>0){S.nodes[nd.id]=tlv(nd.id)+1;S.spent++;MODS=apT();save();SFX.lvl()}else SFX.hurt();return}if(x>16&&x<120&&y>H-52&&y<H-14)G.ov=(G.md==='play')?'pause':null;return}
 if(G.ov==='settings'){lyS();for(i=0;i<SB.length;i++)if(inR(SB[i],x,y)){var id=SB[i].id;if(id==='sound'){S.set.sound=S.set.sound?0:1;if(S.set.sound)SFX.coin()}else if(id==='shake')S.set.shake=S.set.shake?0:1;else if(id==='diff')S.set.diff=(S.set.diff+1)%3;else if(id==='reset'){S={job:'blade',nodes:{},spent:0,points:0,best:{room:0,level:1,kills:0,gold:0,clear:0},set:{sound:1,shake:1,diff:0}};MODS=apT()}else if(id==='back'){G.ov=(G.md==='play')?'pause':null;return}save();return}return}
 if(G.ov==='pause'){lyP();for(i=0;i<PB.length;i++)if(inR(PB[i],x,y)){var pi=PB[i].id;if(pi==='resume')G.ov=null;else if(pi==='restart'){G.ov=null;startRun()}else if(pi==='settings')G.ov='settings';else if(pi==='title'){G.ov=null;G.md='t'}return}return}
@@ -448,8 +457,8 @@ if(G.md==='t'){lyT();for(i=0;i<TB_.length;i++)if(inR(TB_[i],x,y)){S.job=TB_[i].i
 if(y>TBY&&y<TBY+42&&x>W/2-100&&x<W/2+100){startRun();return}
 if(y>TBY+46&&y<TBY+84&&x>W/2-100&&x<W/2+100){G.ov='tree';return}
 if(y>TBY+86&&y<TBY+124&&x>W/2-100&&x<W/2+100){G.ov='settings';return}return}
-if(G.md==='d'||G.md==='w'){lyO();for(i=0;i<OB.length;i++)if(inR(OB[i],x,y)){if(OB[i].id==='retry')startRun();else G.md='t';return}}}
-function startRun(){var J=JOBS[S.job];P.job=S.job;P.wp=J.wp;P.co=J.co;P.sk=J.sk;P.lv=1;P.ex=0;P.nx=20;P.gold=0;P.kl=0;P.cb=0;P.ch=0;P.ac=null;P.aT=0;P.iv=0;P.dd=0;P.dy=0;P.cd=[0,0,0];P.dc=0;P.po=3;P.sw=null;P.cs=null;P.huT=0;P.fc=1;P.jp=2;P.bf=[];P.eq={weapon:null,head:null,body:null,ring:null};MODS=apT();P.mhp=J.hp;P.mmp=J.mp;recalc();P.hp=P.mhp;P.mp=P.mmp;G.md='play';G.rm=0;G.tr=null;G.fl=0;G.bn=null;G.bi=0;G.dT=0;G.wT=0;G.ov=null;parts=[];texts=[];shots=[];loots=[];sls=[];beams=[];arcs=[];genR(0);initA()}
+if(G.md==='dead'||G.md==='win'){lyO();for(i=0;i<OB.length;i++)if(inR(OB[i],x,y)){if(OB[i].id==='retry')startRun();else G.md='t';return}}}
+function startRun(){var J=JOBS[S.job];P.job=S.job;P.wp=J.wp;P.co=J.co;P.sk=J.sk;P.lv=1;P.ex=0;P.nx=20;P.gold=0;P.kl=0;P.cb=0;P.ch=0;P.ac=null;P.aT=0;P.iv=0;P.dd=0;P.dy=0;P.cd=[0,0,0];P.dc=0;P.po=3;P.sw=null;P.cs=null;P.huT=0;P.fc=1;P.jp=2;P.bf=[];P.eq={weapon:null,head:null,body:null,ring:null};MODS=apT();P.mhp=J.hp;P.mmp=J.mp;recalc();P.hp=P.mhp;P.mp=P.mmp;G.md='play';G.rm=0;G.tr=null;G.fl=0;G.bn=null;G.bi=0;G.dT=0;G.wT=0;G.ov=null;parts=[];texts=[];shots=[];loots=[];sls=[];beams=[];arcs=[];G.wave=0;G.waveMax=1;G.waveT=0;genR(0);initA()}
 function dBtn(r,l,sub,f,s,tc,fs){ctx.save();FS(LG(0,r.y,0,r.y+r.h,f[0],f[1]));rr(r.x,r.y,r.w,r.h,Math.min(14,r.h/2));ctx.fill();SS(s);ctx.lineWidth=1.5;rr(r.x,r.y,r.w,r.h,Math.min(14,r.h/2));ctx.stroke();FS(tc);TA('center');TB('middle');FN('900 '+(fs||16)+'px "PingFang SC",sans-serif');ctx.fillText(l,r.x+r.w/2,r.y+r.h/2-(sub?7:0));if(sub){FN('600 10px "PingFang SC",sans-serif');AL(.75);ctx.fillText(sub,r.x+r.w/2,r.y+r.h/2+9)}ctx.restore()}
 function wrT(t,x,y,mw,lh){var w=t.split('·'),ln='',yy=y;for(var i=0;i<w.length;i++){var ts=ln+w[i]+(i<w.length-1?'·':'');if(ctx.measureText(ts).width>mw&&ln){ctx.fillText(ln,x,yy);yy+=lh;ln=w[i]}else ln=ts}ctx.fillText(ln,x,yy)}
 function drTitle(){lyT();ctx.save();TA('center');FN('900 '+Math.min(54,W*.13)+'px "PingFang SC",sans-serif');ctx.lineWidth=8;SS('rgba(0,0,0,.55)');ctx.strokeText('地下城勇士',W/2,H*.14);FS(LG(0,H*.07,0,H*.19,'#fff3c4','#c62f16'));ctx.fillText('地下城勇士',W/2,H*.14);FN('600 11px sans-serif');FS('#9d95bd');ctx.fillText('DUNGEON FIGHTER 2D · 选择职业',W/2,H*.18);
@@ -477,10 +486,10 @@ function render(){ctx.clearRect(0,0,W,H);if(G.md==='t'){drTitle();if(G.ov==='tre
 drBG();var sx=0,sy=0;if(G.shT>0){sx=rnd(-G.shM,G.shM);sy=rnd(-G.shM,G.shM)}ctx.save();ctx.translate(-cam.x+sx,sy);drRoom();drEnt();ctx.restore();drHUD();drBn();drBI();
 if(('ontouchstart' in window)&&G.md==='play'&&!G.ov)drTch();if(G.fl>0){FS('rgba(255,40,40,'+(G.fl*.35)+')');ctx.fillRect(0,0,W,H)}
 if(G.tr){var a=G.tr.ph==='out'?G.tr.t/.45:1-G.tr.t/.45;FS('rgba(0,0,0,'+cl(a,0,1)+')');ctx.fillRect(0,0,W,H)}
-if(G.ov==='tree')drTree();else if(G.ov==='settings')drSet();else if(G.ov==='pause')drPause();else if(G.ov==='reward')drRw();if(G.md==='d'||G.md==='w')drOver();
-if(G.ht>0&&G.md==='play'&&!G.ov){ctx.save();AL(cl(G.ht,0,1));TA('center');var hw=Math.min(420,W-40);FS('rgba(0,0,0,.5)');rr(W/2-hw/2,GROUND-52,hw,30,15);ctx.fill();FS('#e6e1f5');FN('12px "PingFang SC",sans-serif');ctx.fillText('消灭全部怪物开启传送门',W/2,GROUND-32);ctx.restore()}}
+if(G.ov==='tree')drTree();else if(G.ov==='settings')drSet();else if(G.ov==='pause')drPause();else if(G.ov==='reward')drRw();if(G.md==='dead'||G.md==='win')drOver();
+if(G.ht>0&&G.md==='play'&&!G.ov){ctx.save();AL(cl(G.ht,0,1));TA('center');var hw=Math.min(420,W-40);FS('rgba(0,0,0,.5)');rr(W/2-hw/2,GROUND-52,hw,30,15);ctx.fill();FS('#e6e1f5');FN('12px "PingFang SC",sans-serif');ctx.fillText(G.waveMax>1?('第 '+(G.wave+1)+'/'+G.waveMax+' 波 · 消灭本波敌人'):'消灭全部怪物开启传送门',W/2,GROUND-32);ctx.restore()}}
 var last=performance.now();
-function loop(t){requestAnimationFrame(loop);var dt=(t-last)/1000;last=t;if(dt>.05)dt=.05;G.tm+=dt;if(G.shT>0)G.shT-=dt;if(G.fl>0)G.fl-=dt*1.8;if(G.md==='dead')G.dT+=dt;PLS.atk=0;PLS.s1=0;PLS.s2=0;PLS.ult=0;PLS.jump=0;PLS.dash=0;PLS.pot=0;hPoi();var av=((G.md==='play')||(G.md==='d')||(G.md==='w'))&&!G.ov;if(av){if(G.hs>0)G.hs-=dt;else upd(dt)}else upFx(dt);IN.jP=0;IN.aP=0;IN.s1P=0;IN.s2P=0;IN.uP=0;IN.dP=0;IN.pP=0;render()}
+function loop(t){requestAnimationFrame(loop);var dt=(t-last)/1000;last=t;if(dt>.05)dt=.05;G.tm+=dt;if(G.shT>0)G.shT-=dt;if(G.fl>0)G.fl-=dt*1.8;if(G.md==='dead')G.dT+=dt;PLS.atk=0;PLS.s1=0;PLS.s2=0;PLS.ult=0;PLS.jump=0;PLS.dash=0;PLS.pot=0;hPoi();var av=(G.md==='play')&&!G.ov;if(av){if(G.hs>0)G.hs-=dt;else upd(dt)}else upFx(dt);IN.jP=0;IN.aP=0;IN.s1P=0;IN.s2P=0;IN.uP=0;IN.dP=0;IN.pP=0;render()}
 lyT();requestAnimationFrame(loop);
 </script>
 </body>

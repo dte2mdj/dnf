@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>实用工具 - DNF 攻略站</title>
+  <meta name="description" content="DNF 实用工具：强化成本模拟器。" />
+  <link rel="stylesheet" href="./css/main.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="./index.html">DNF<span>攻略站</span></a>
+      <button class="nav-toggle" id="navToggle" aria-label="打开菜单">☰</button>
+      <nav class="nav" id="nav">
+        <a href="./index.html">首页</a>
+        <a href="./guides.html">新手指南</a>
+        <a href="./tools.html" class="active">实用工具</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1 class="page-title">实用工具</h1>
+
+    <section class="panel" id="enchant">
+      <h2>附魔性价比速查</h2>
+      <table class="table">
+        <thead>
+          <tr><th>部位</th><th>平民附魔</th><th>毕业附魔</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>武器</td><td>属性攻击 + 属强</td><td>三攻 + 属强（礼包）</td></tr>
+          <tr><td>首饰</td><td>对应属强 +21</td><td>属强 +35（版本顶级）</td></tr>
+          <tr><td>防具</td><td>体力/精神、暴击</td><td>技能等级 / 四维</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>强化成本模拟器</h2>
+      <p class="muted">输入目标强化等级与当前等级，估算所需金币（按示例概率计算，仅供娱乐）。</p>
+      <div class="calc">
+        <label>当前等级 <input type="number" id="curLevel" value="0" min="0" max="20" /></label>
+        <label>目标等级 <input type="number" id="targetLevel" value="10" min="0" max="20" /></label>
+        <label>每次尝试成本（万金币） <input type="number" id="cost" value="50" min="1" /></label>
+        <button class="btn" id="calcBtn">计算</button>
+      </div>
+      <p class="result" id="calcResult">结果会显示在这里</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">© 2026 DNF 攻略站 · 由 GitHub Pages 托管</div>
+  </footer>
+  <script src="./js/main.js"></script>
+</body>
+</html>

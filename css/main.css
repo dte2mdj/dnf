@@ -1,0 +1,195 @@
+:root {
+  --bg: #12101a;
+  --panel: #1d1a2a;
+  --accent: #ff8c1a;
+  --accent-2: #ffd24d;
+  --text: #eae6f2;
+  --muted: #9a93ad;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  line-height: 1.7;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.container { width: min(960px, 92%); margin: 0 auto; }
+
+/* 头部导航 */
+.site-header {
+  background: rgba(18, 16, 26, 0.95);
+  border-bottom: 1px solid #2c2740;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+}
+.logo {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--accent-2);
+  text-decoration: none;
+  letter-spacing: 1px;
+}
+.logo span { color: var(--accent); margin-left: 4px; }
+.nav { display: flex; gap: 22px; }
+.nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.95rem;
+  padding: 4px 2px;
+  border-bottom: 2px solid transparent;
+}
+.nav a:hover { color: var(--text); }
+.nav a.active { color: var(--accent-2); border-bottom-color: var(--accent); }
+.nav-toggle {
+  display: none;
+  background: none;
+  border: 1px solid #3a3350;
+  color: var(--text);
+  font-size: 1.1rem;
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+/* 主体 */
+main { flex: 1; padding: 32px 0 56px; }
+
+.hero {
+  text-align: center;
+  padding: 56px 20px;
+  background: linear-gradient(160deg, #241d3a, #16121f);
+  border: 1px solid #322a4a;
+  border-radius: 14px;
+  margin-bottom: 32px;
+}
+.hero h1 { font-size: 2rem; margin-bottom: 12px; color: var(--accent-2); }
+.hero p { color: var(--muted); margin-bottom: 22px; }
+
+.btn {
+  display: inline-block;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  color: #1a1420;
+  font-weight: 700;
+  text-decoration: none;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 22px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+.btn:hover { filter: brightness(1.08); }
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+}
+.card {
+  display: block;
+  background: var(--panel);
+  border: 1px solid #2c2740;
+  border-radius: 12px;
+  padding: 22px;
+  text-decoration: none;
+  color: var(--text);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.card:hover { transform: translateY(-3px); border-color: var(--accent); }
+.card h3 { margin-bottom: 8px; color: var(--accent-2); }
+.card p { color: var(--muted); font-size: 0.92rem; }
+
+.page-title { font-size: 1.6rem; margin-bottom: 24px; color: var(--accent-2); }
+
+.panel {
+  background: var(--panel);
+  border: 1px solid #2c2740;
+  border-radius: 12px;
+  padding: 22px;
+  margin-bottom: 22px;
+}
+.panel h2 { font-size: 1.15rem; margin-bottom: 14px; color: var(--accent-2); }
+
+.checklist { list-style: none; }
+.checklist li {
+  padding: 8px 0 8px 26px;
+  position: relative;
+  color: var(--text);
+  border-bottom: 1px dashed #2c2740;
+}
+.checklist li:last-child { border-bottom: none; }
+.checklist li::before {
+  content: "✔";
+  color: var(--accent);
+  position: absolute;
+  left: 2px;
+}
+
+.table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.table th, .table td {
+  text-align: left;
+  padding: 9px 10px;
+  border-bottom: 1px solid #2c2740;
+}
+.table th { color: var(--accent-2); }
+.table tr:last-child td { border-bottom: none; }
+
+.calc { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; margin: 14px 0; }
+.calc label { display: flex; flex-direction: column; gap: 6px; font-size: 0.88rem; color: var(--muted); }
+.calc input {
+  background: #14111f;
+  border: 1px solid #3a3350;
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 10px;
+  width: 130px;
+  font-size: 0.95rem;
+}
+.result {
+  margin-top: 10px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--accent-2);
+}
+
+.muted { color: var(--muted); font-size: 0.88rem; }
+
+.site-footer {
+  border-top: 1px solid #2c2740;
+  padding: 18px 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* 移动端 */
+@media (max-width: 640px) {
+  .nav-toggle { display: block; }
+  .nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    gap: 0;
+    background: #1d1a2a;
+    border-bottom: 1px solid #2c2740;
+    padding: 10px 4%;
+  }
+  .nav.open { display: flex; }
+  .nav a { padding: 12px 4px; border-bottom: none; }
+  .hero { padding: 40px 16px; }
+}

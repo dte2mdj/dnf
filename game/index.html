@@ -2,6 +2,9 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8"/>
+<meta http-equiv="Cache-Control" content="no-store"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
 <title>地下城勇士 · Dungeon Fighter 2D</title>
 <style>
@@ -17,8 +20,18 @@ var W=0,H=0,GROUND=0,roomW=1800;
 var canvas=document.createElement('canvas');document.body.appendChild(canvas);
 var ctx=canvas.getContext('2d');
 function resize(){var d=Math.min(2,window.devicePixelRatio||1);W=window.innerWidth||360;H=window.innerHeight||640;
-canvas.width=W*d;canvas.height=H*d;canvas.style.width=W+'px';canvas.style.height=H+'px';ctx.setTransform(d,0,0,d,0,0);GROUND=H-70;roomW=Math.max(1500,W*1.6);}
+canvas.width=W*d;canvas.height=H*d;canvas.style.width=W+'px';canvas.style.height=H+'px';ctx.setTransform(d,0,0,d,0,0);GROUND=H-70;roomW=Math.max(1500,W*1.6);syncGeo()}
 resize();window.addEventListener('resize',resize);
+// 窗口尺寸变化后，把已生成房间的几何同步到新的 GROUND/roomW，
+// 避免地面、传送门、实体、相机错位（旧版 resize 后完全没同步）
+function syncGeo(){if(!plats||!plats.length)return;var i,e;
+plats[0].y=GROUND;plats[0].h=H-GROUND+20;plats[0].w=roomW;
+for(i=1;i<plats.length;i++){e=plats[i];e.y=cl(e.y,40,GROUND-90)}
+if(decs)for(i=0;i<decs.length;i++)decs[i].y=GROUND-4;
+if(port){port.x=roomW-120;port.y=GROUND-52}
+for(i=0;i<ens.length;i++){e=ens[i];if(e.y+e.h>plats[0].y){e.y=plats[0].y-e.h;if(e.vy>0)e.vy=0;e.og=1}}
+if(G&&G.md!=='t'&&P){P.y=Math.min(P.y,GROUND-P.h);if(P.y+P.h>GROUND){P.y=GROUND-P.h;if(P.vy>0)P.vy=0}}
+cam.x=cl(cam.x,0,Math.max(0,roomW-W))}
 function rnd(a,b){return a+Math.random()*(b-a)}
 function rndi(a,b){return Math.floor(rnd(a,b+1))}
 function cl(v,a,b){return v<a?a:(v>b?b:v)}
@@ -202,8 +215,13 @@ for(i=texts.length-1;i>=0;i--){var t=texts[i];t.lf-=dt;t.y+=t.vy*dt;t.vy*=.92;if
 for(i=arcs.length-1;i>=0;i--){arcs[i].t+=dt;if(arcs[i].t>=arcs[i].lf)arcs.splice(i,1)}}
 
 function mvC(e,dt){e.vy+=2200*dt;if(e.vy>1600)e.vy=1600;e.x+=e.vx*dt;e.y+=e.vy*dt;e.og=0;
-for(var i=0;i<plats.length;i++){var p=plats[i];if(e.x+e.w>p.x&&e.x<p.x+p.w){if(e.vy>=0&&e.y+e.h>=p.y&&e.y+e.h-e.vy*dt<=p.y+1){e.y=p.y-e.h;e.vy=0;e.og=1}}}
-var nx=cl(e.x,0,roomW-e.w);if(e.stun>0&&e.wcd<=0&&nx!==e.x&&Math.abs(e.vx)>430){wallSlam(e);e.vx*=-.28}if(e.wcd>0)e.wcd-=dt;e.x=nx;if(e.y>H+300){e.y=GROUND-e.h;e.vy=0}}
+var i,p,gnd=null;
+for(i=0;i<plats.length;i++){p=plats[i];if(e.x+e.w>p.x&&e.x<p.x+p.w){if(e.vy>=0&&e.y+e.h>=p.y&&e.y+e.h-e.vy*dt<=p.y+1){e.y=p.y-e.h;e.vy=0;e.og=1}if(p.gr)gnd=p}}
+// 兜底吸附：地面板厚 90px、单帧最多位移 80px，正常穿不过去；
+// 但窗口缩放/极端 dt 下仍可能陷进板内，这里强制拉回地面表面
+if(!e.og&&gnd&&e.y+e.h>gnd.y){e.y=gnd.y-e.h;e.vy=0;e.og=1}
+var nx=cl(e.x,0,roomW-e.w);if(e.stun>0&&e.wcd<=0&&nx!==e.x&&Math.abs(e.vx)>430){wallSlam(e);e.vx*=-.28}if(e.wcd>0)e.wcd-=dt;e.x=nx;
+if(gnd&&e.y+e.h>gnd.y+2){e.y=gnd.y-e.h;if(e.vy>0)e.vy=0;e.og=1}}
 function fBox(s,rg,h,oy){var cx=s.x+s.w/2+s.fc*(s.w/2+rg/2),x=cx-rg/2;if(x<0)x=0;else if(x+rg>roomW)x=Math.max(0,roomW-rg);return{x:x,y:s.y+oy,w:rg,h:h}}
 function nrstE(x,y,md){var b=null,bd=md||1e9,i,d,e;for(i=0;i<ens.length;i++){e=ens[i];if(e.dy)continue;d=dst(x,y,e.x+e.w/2,e.y+e.h/2);if(d<bd){bd=d;b=e}}return b}
 
@@ -280,7 +298,11 @@ if(IN.pP)usPot();if(IN.aP)stAtk();else if(IN.s1P)usSk(0);else if(IN.s2P)usSk(1);
 function eFt(e,tx){var d=tx-(e.x+e.w/2);if(Math.abs(d)>4)e.fc=d>0?1:-1}
 function eSw(e,dt){var s=e.sw;if(!s)return;s.t+=dt;if(s.t>=s.h0&&s.t<=s.h1){var bx=fBox(e,s.rg,s.hh,s.oy);if(!s.hit&&aabb(bx,P)){s.hit=1;hrP(s.dg,s.kb,0)}
 if(s.tk<1&&s.t>s.h0+.02){s.tk=1;slFx(e.x+e.w/2+e.fc*30,e.y+e.h*.45,e.fc,s.rg*.8,'rgba(255,120,90,.9)',.15);SFX.slash()}}}
-function upE(e,dt){if(e.dy){e.dt-=dt;e.vy+=2200*dt;e.x+=e.vx*dt;e.y+=e.vy*dt;e.vx*=.94;if(e.y+e.h>GROUND){e.y=GROUND-e.h;e.vy*=-.3}if(e.dt<=0)ens.splice(ens.indexOf(e),1);return}
+function upE(e,dt){if(e.dy){e.dt-=dt;e.vy+=2200*dt;e.x+=e.vx*dt;e.y+=e.vy*dt;e.vx*=.94;
+// 死亡坠落也要落到房间真实地面 plats[0].y；旧版写死全局 GROUND，
+// 一旦 GROUND 变化，尸体会陷到地面线以下，看起来像“卡住”
+var gy=(plats&&plats.length)?plats[0].y:GROUND;if(e.y+e.h>gy){e.y=gy-e.h;e.vy*=-.3}
+if(e.dt<=0)ens.splice(ens.indexOf(e),1);return}
 if(e.burn>0){e.burn-=dt;e.burnT=(e.burnT||.4)-dt;if(e.burnT<=0){e.burnT=.4;if(!e.dy){var bd=Math.round(e.burnD*.4);e.hp-=bd;ft(e.x+e.w/2+rnd(-6,6),e.y-2,''+bd,'#ff9a5c',11);if(Math.random()<.5)bu(e.x+e.w/2+rnd(-8,8),e.y+rnd(4,e.h-4),1,'#ff7a3c',60,.4,3);if(e.hp<=0)klE(e)}}}e.an+=dt*(Math.abs(e.vx)>20?1:.2);e.huT-=dt;e.acd-=dt;e.scd-=dt;e.tc-=dt;if(e.sl>0)e.sl-=dt;
 if(e.stun>0){e.stun-=dt;e.an+=dt*.5;
 if(e.og){e.vx*=.88;if(Math.abs(e.vx)>150&&Math.random()<.7)parts.push({x:e.x+e.w/2+rnd(-e.w/3,e.w/3),y:e.y+e.h,vx:-e.vx*.1,vy:-rnd(20,90),g:520,lf:.32,mx:.32,c:'#c9c2e8',s:rnd(2,4)})}
@@ -485,7 +507,7 @@ if(y>TBY&&y<TBY+42&&x>W/2-100&&x<W/2+100){startRun();return}
 if(y>TBY+46&&y<TBY+84&&x>W/2-100&&x<W/2+100){G.ov='tree';return}
 if(y>TBY+86&&y<TBY+124&&x>W/2-100&&x<W/2+100){G.ov='settings';return}return}
 if(G.md==='dead'||G.md==='win'){lyO();for(i=0;i<OB.length;i++)if(inR(OB[i],x,y)){if(OB[i].id==='retry')startRun();else G.md='t';return}}}
-function startRun(){var J=JOBS[S.job];P.job=S.job;P.wp=J.wp;P.co=J.co;P.sk=J.sk;P.lv=1;P.ex=0;P.nx=20;P.gold=0;P.kl=0;P.cb=0;P.ch=0;P.ac=null;P.aT=0;P.iv=0;P.dd=0;P.dy=0;P.cd=[0,0,0];P.dc=0;P.po=3;P.sw=null;P.cs=null;P.huT=0;P.fc=1;P.jp=2;P.bf=[];P.eq={weapon:null,head:null,body:null,ring:null};MODS=apT();P.mhp=J.hp;P.mmp=J.mp;recalc();P.hp=P.mhp;P.mp=P.mmp;G.md='play';G.rm=0;G.tr=null;G.fl=0;G.bn=null;G.bi=0;G.dT=0;G.wT=0;G.ov=null;parts=[];texts=[];shots=[];loots=[];sls=[];beams=[];arcs=[];G.wave=0;G.waveMax=1;G.waveT=0;genR(0);initA()}
+function startRun(){var J=JOBS[S.job];P.job=S.job;P.wp=J.wp;P.co=J.co;P.sk=J.sk;P.lv=1;P.ex=0;P.nx=20;P.gold=0;P.kl=0;P.cb=0;P.ch=0;P.ac=null;P.aT=0;P.iv=0;P.dd=0;P.dy=0;P.cd=[0,0,0];P.dc=0;P.po=3;P.sw=null;P.cs=null;P.huT=0;P.fc=1;P.jp=2;P.bf=[];P.eq={weapon:null,head:null,body:null,ring:null};MODS=apT();P.mhp=J.hp;P.mmp=J.mp;recalc();P.hp=P.mhp;P.mp=P.mmp;G.md='play';G.rm=0;G.tr=null;G.fl=0;G.bn=null;G.bi=0;G.dT=0;G.wT=0;G.ov=null;parts=[];texts=[];shots=[];loots=[];sls=[];beams=[];arcs=[];G.wave=0;G.waveMax=1;G.waveT=0;G.err=0;genR(0);initA()}
 function dBtn(r,l,sub,f,s,tc,fs){ctx.save();FS(LG(0,r.y,0,r.y+r.h,f[0],f[1]));rr(r.x,r.y,r.w,r.h,Math.min(14,r.h/2));ctx.fill();SS(s);ctx.lineWidth=1.5;rr(r.x,r.y,r.w,r.h,Math.min(14,r.h/2));ctx.stroke();FS(tc);TA('center');TB('middle');FN('900 '+(fs||16)+'px "PingFang SC",sans-serif');ctx.fillText(l,r.x+r.w/2,r.y+r.h/2-(sub?7:0));if(sub){FN('600 10px "PingFang SC",sans-serif');AL(.75);ctx.fillText(sub,r.x+r.w/2,r.y+r.h/2+9)}ctx.restore()}
 function wrT(t,x,y,mw,lh){var w=t.split('·'),ln='',yy=y;for(var i=0;i<w.length;i++){var ts=ln+w[i]+(i<w.length-1?'·':'');if(ctx.measureText(ts).width>mw&&ln){ctx.fillText(ln,x,yy);yy+=lh;ln=w[i]}else ln=ts}ctx.fillText(ln,x,yy)}
 function drTitle(){lyT();ctx.save();TA('center');FN('900 '+Math.min(54,W*.13)+'px "PingFang SC",sans-serif');ctx.lineWidth=8;SS('rgba(0,0,0,.55)');ctx.strokeText('地下城勇士',W/2,H*.14);FS(LG(0,H*.07,0,H*.19,'#fff3c4','#c62f16'));ctx.fillText('地下城勇士',W/2,H*.14);FN('600 11px sans-serif');FS('#9d95bd');ctx.fillText('DUNGEON FIGHTER 2D · 选择职业',W/2,H*.18);
@@ -511,14 +533,20 @@ for(var i=0;i<RB.length;i++){var b=RB[i],c=G.rc[i];if(!c)continue;FS('rgba(255,2
 function drOver(){var dd=(G.md==='dead');ctx.save();FS('rgba(6,6,14,'+(dd?cl(G.dT/.8,0,.82):.82)+')');ctx.fillRect(0,0,W,H);TA('center');FN('900 '+Math.min(44,W*.11)+'px "PingFang SC",sans-serif');if(dd){FS(LG(0,H*.28,0,H*.36,'#ff9a9a','#c62f16'));ctx.fillText('你已阵亡',W/2,H*.32)}else{FS(LG(0,H*.28,0,H*.36,'#fff3c4','#ff8a3c'));ctx.fillText('通关成功！',W/2,H*.32)}
 lyO();var pw=Math.min(320,W-60),px=(W-pw)/2,py=H*.38,ph=126;FS('rgba(255,255,255,.06)');rr(px,py,pw,ph,14);ctx.fill();SS('rgba(255,255,255,.14)');ctx.lineWidth=1;rr(px,py,pw,ph,14);ctx.stroke();var rw=[['职业',JOBS[P.job].n],['到达关卡',rmName(G.rm)],['角色等级','Lv.'+P.lv],['击杀怪物',P.kl+''],['获得金币',P.gold+'']];FN('13px "PingFang SC",sans-serif');TA('left');for(var i=0;i<rw.length;i++){var yy=py+22+i*21;FS('#9d95bd');ctx.fillText(rw[i][0],px+16,yy);TA('right');FS('#ffd166');FN('900 13px "PingFang SC",sans-serif');ctx.fillText(rw[i][1],px+pw-16,yy);TA('left');FN('13px "PingFang SC",sans-serif')}
 dBtn(OB[0],dd?'重新挑战':'再来一次','',['#ffe9a8','#f08a1e'],'rgba(255,255,255,.35)','#3a1a05',17);dBtn(OB[1],'返回标题','',['rgba(255,255,255,.14)','rgba(255,255,255,.05)'],'rgba(255,255,255,.28)','#e6e1f5',15);ctx.restore()}
-function render(){ctx.clearRect(0,0,W,H);if(G.md==='t'){drTitle();if(G.ov==='tree')drTree();else if(G.ov==='settings')drSet();return}
+// 单帧异常不再冻结游戏：捕获后只在左下角显示角标，其余逻辑继续跑
+function onErr(e,tag){G.err=(G.err||0)+1;if(G.err<6)console.error('[DNF]['+tag+']',e);
+// 异常可能中断在 save() 之后，这里复位变换矩阵，避免 restore 栈失衡越积越多
+var d=Math.min(2,window.devicePixelRatio||1);ctx.setTransform(d,0,0,d,0,0)}
+function render(){if(G.err){ctx.save();FS('rgba(255,110,110,.92)');FN('11px monospace');TA('left');
+ ctx.fillText('异常x'+G.err+' 已自动保护，建议刷新页面',10,H-10);ctx.restore()}try{_render()}catch(e){onErr(e,'render')}}
+function _render(){ctx.clearRect(0,0,W,H);if(G.md==='t'){drTitle();if(G.ov==='tree')drTree();else if(G.ov==='settings')drSet();return}
 drBG();var sx=0,sy=0;if(G.shT>0){sx=rnd(-G.shM,G.shM);sy=rnd(-G.shM,G.shM)}ctx.save();ctx.translate(-cam.x+sx,sy);drRoom();drEnt();if(orbs.length)drOrb();ctx.restore();drHUD();drBn();drBI();
 if(('ontouchstart' in window)&&G.md==='play'&&!G.ov)drTch();if(G.fl>0){FS('rgba(255,40,40,'+(G.fl*.35)+')');ctx.fillRect(0,0,W,H)}
 if(G.tr){var a=G.tr.ph==='out'?G.tr.t/.45:1-G.tr.t/.45;FS('rgba(0,0,0,'+cl(a,0,1)+')');ctx.fillRect(0,0,W,H)}
 if(G.ov==='tree')drTree();else if(G.ov==='settings')drSet();else if(G.ov==='pause')drPause();else if(G.ov==='reward')drRw();if(G.md==='dead'||G.md==='win')drOver();
 if(G.ht>0&&G.md==='play'&&!G.ov){ctx.save();AL(cl(G.ht,0,1));TA('center');var hw=Math.min(420,W-40);FS('rgba(0,0,0,.5)');rr(W/2-hw/2,GROUND-52,hw,30,15);ctx.fill();FS('#e6e1f5');FN('12px "PingFang SC",sans-serif');ctx.fillText(G.waveMax>1?('第 '+(G.wave+1)+'/'+G.waveMax+' 波 · 消灭本波敌人'):'消灭全部怪物开启传送门',W/2,GROUND-32);ctx.restore()}}
 var last=performance.now();
-function loop(t){requestAnimationFrame(loop);var dt=(t-last)/1000;last=t;if(dt>.05)dt=.05;G.tm+=dt;if(G.shT>0)G.shT-=dt;if(G.fl>0)G.fl-=dt*1.8;if(G.md==='dead')G.dT+=dt;PLS.atk=0;PLS.s1=0;PLS.s2=0;PLS.ult=0;PLS.jump=0;PLS.dash=0;PLS.pot=0;hPoi();var av=(G.md==='play')&&!G.ov;if(av){if(G.hs>0)G.hs-=dt;else upd(dt)}else upFx(dt);IN.jP=0;IN.aP=0;IN.s1P=0;IN.s2P=0;IN.uP=0;IN.dP=0;IN.pP=0;render()}
+function loop(t){requestAnimationFrame(loop);var dt=(t-last)/1000;last=t;if(dt>.05)dt=.05;G.tm+=dt;if(G.shT>0)G.shT-=dt;if(G.fl>0)G.fl-=dt*1.8;if(G.md==='dead')G.dT+=dt;PLS.atk=0;PLS.s1=0;PLS.s2=0;PLS.ult=0;PLS.jump=0;PLS.dash=0;PLS.pot=0;hPoi();var av=(G.md==='play')&&!G.ov;if(av){if(G.hs>0)G.hs-=dt;else{try{upd(dt)}catch(e){onErr(e,'upd')}}}else{try{upFx(dt)}catch(e){onErr(e,'upFx')}}IN.jP=0;IN.aP=0;IN.s1P=0;IN.s2P=0;IN.uP=0;IN.dP=0;IN.pP=0;render()}
 lyT();requestAnimationFrame(loop);
 </script>
 </body>

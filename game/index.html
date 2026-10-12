@@ -25,7 +25,7 @@ function cl(v,a,b){return v<a?a:(v>b?b:v)}
 function aabb(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
 function dst(a,b,c,d){return Math.sqrt((a-c)*(a-c)+(b-d)*(b-d))}
 function inR(r,x,y){return x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h}
-function inC(c,r,x,y){return dst(x,y,c,c)<=r}
+function inC(cx,cy,r,x,y){return dst(x,y,cx,cy)<=r}
 function pick(a){return a[rndi(0,a.length-1)]}
 function rr(x,y,w,h,r){ctx.beginPath();r=Math.min(r,w/2,h/2);ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
 function TA(a){ctx.textAlign=a}
@@ -425,12 +425,25 @@ if(bo){var bw=Math.min(440,W-80),bx2=(W-bw)/2;TA('center');FS('#ff9d9d');FN('900
 FS('rgba(255,255,255,.5)');ctx.fillRect(W-204,22,5,16);ctx.fillRect(W-196,22,5,16);ctx.restore()}
 function drBn(){if(!G.bn)return;var b=G.bn,a=cl(b.lf/.5,0,1);ctx.save();AL(a);TA('center');FN('900 32px "PingFang SC",sans-serif');ctx.lineWidth=6;SS('rgba(0,0,0,.65)');ctx.strokeText(b.t,W/2,H*.3);FS(LG(0,H*.23,0,H*.32,'#fff3c4','#ff8a3c'));ctx.fillText(b.t,W/2,H*.3);FN('700 14px sans-serif');FS('#cfc6ee');ctx.fillText(b.s,W/2,H*.3+28);ctx.restore()}
 function drBI(){if(G.bi<=0)return;var a=cl(G.bi/.5,0,1);ctx.save();FS('rgba(0,0,0,'+(.75*a)+')');ctx.fillRect(0,0,W,H*.16);ctx.fillRect(0,H*.84,W,H*.16);TA('center');AL(a);FN('900 '+Math.min(30,W*.07)+'px "PingFang SC",sans-serif');FS(LG(0,H*.4,0,H*.5,'#fff3c4','#ff4d4d'));ctx.fillText(G.rm===ROOMS-1?'暗黑城主 · 玛尔斯':'巨魔领主 · 戈隆',W/2,H*.46);FN('700 13px sans-serif');FS('#ffb3b3');ctx.fillText(G.rm===ROOMS-1?'最终决战 · FINAL DUEL':'领主战 · LORD',W/2,H*.51);ctx.restore()}
-function btnL(){var J=JOBS[P.job],ax=W-64;var L=[{id:'atk',x:ax,y:H-74,r:46,l:'攻击'},{id:'s1',x:ax-78,y:H-66,r:30,l:J.sk[0].n},{id:'s2',x:ax,y:H-148,r:30,l:J.sk[1].n},{id:'ult',x:ax-88,y:H-142,r:34,l:J.sk[2].n},{id:'jump',x:190,y:H-190,r:32,l:'跳'},{id:'dash',x:104,y:H-212,r:30,l:'闪避'},{id:'pot',x:196,y:H-116,r:30,l:'药水'}];for(var i=0;i<L.length;i++){L[i].x=cl(L[i].x,L[i].r+8,W-L[i].r-8);L[i].y=cl(L[i].y,L[i].r+8,H-L[i].r-8)}return L}
-function drTch(){var L=btnL(),i,sx=100,sy=H-110;ctx.save();AL(.3);FS('#fff');if(sId!==null){ctx.beginPath();ctx.arc(sOX,sOY,58,0,6.283);ctx.fill()}ctx.restore();
+function btnL(){var J=JOBS[P.job],i;
+var sc=cl(W/420,.74,1),g=Math.round(9*sc);
+var ra=Math.round(46*sc),rs=Math.round(29*sc),ru=Math.round(33*sc),rj=Math.round(31*sc),rd=Math.round(29*sc),rp=Math.round(27*sc);
+var ax=W-8-ra,ay=H-8-ra;
+var L=[{id:'atk',x:ax,y:ay,r:ra,l:'攻击'},
+{id:'s2',x:ax,y:ay-ra-rs-g,r:rs,l:J.sk[1].n},
+{id:'s1',x:ax-ra-rs-g-3,y:ay-4,r:rs,l:J.sk[0].n},
+{id:'ult',x:ax-ra-ru-g-3,y:ay-ra-ru-g,r:ru,l:J.sk[2].n}];
+var z=stZ(),jx=z.x+z.w/2;
+L.push({id:'jump',x:jx,y:z.y-rj-g,r:rj,l:'跳'});
+L.push({id:'dash',x:jx+rj+rd+g,y:z.y-rj-g,r:rd,l:'闪避'});
+L.push({id:'pot',x:jx,y:z.y-rj-g-rj-rp-g,r:rp,l:'药水'});
+for(i=0;i<L.length;i++){L[i].x=cl(L[i].x,L[i].r+6,W-L[i].r-6);L[i].y=cl(L[i].y,L[i].r+6,H-L[i].r-6)}
+return L}
+function drTch(){var L=btnL(),i,z=stZ(),sx=z.x+z.w/2,sy=z.y+z.h/2;ctx.save();AL(.3);FS('#fff');if(sId!==null){ctx.beginPath();ctx.arc(sOX,sOY,58,0,6.283);ctx.fill()}ctx.restore();
 ctx.save();AL(.5);SS('rgba(255,255,255,.3)');ctx.lineWidth=2;ctx.beginPath();ctx.arc(sx,sy,58,0,6.283);ctx.stroke();FS('rgba(255,255,255,.08)');ctx.beginPath();ctx.arc(sx,sy,58,0,6.283);ctx.fill();
-if(sId!==null){var kx=sx+cl(sDX,-58,58),ky=sy+cl(sDY,-58,58);AL(.95);FS(RG(kx-6,ky-6,2,24,'#fff','#8f9bb3'));ctx.beginPath();ctx.arc(kx,ky,24,0,6.283);ctx.fill()}else{AL(.4);FS('#9aa4bb');ctx.beginPath();ctx.arc(sx,sy,22,0,6.283);ctx.fill()}ctx.restore();
+if(sId!==null){var kx=sOX+cl(sDX,-58,58),ky=sOY+cl(sDY,-58,58);AL(.95);FS(RG(kx-6,ky-6,2,24,'#fff','#8f9bb3'));ctx.beginPath();ctx.arc(kx,ky,24,0,6.283);ctx.fill()}else{AL(.4);FS('#9aa4bb');ctx.beginPath();ctx.arc(sx,sy,22,0,6.283);ctx.fill()}ctx.restore();
 for(i=0;i<L.length;i++){var b=L[i],ac=BTN[b.id],cd=(b.id==='dash')?Math.max(0,P.dc):0;ctx.save();AL(ac?.95:.7);var ia=(b.id==='atk'),iu=(b.id==='ult'),g;if(ia)g=RG(b.x-b.r*.3,b.y-b.r*.3,2,b.r,'rgba(255,225,160,.75)','rgba(255,120,60,.35)');else if(iu)g=RG(b.x-b.r*.3,b.y-b.r*.3,2,b.r,'rgba(255,170,205,.7)','rgba(255,60,120,.3)');else g=RG(b.x-b.r*.3,b.y-b.r*.3,2,b.r,'rgba(255,255,255,.35)','rgba(255,255,255,.08)');FS(g);ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,6.283);ctx.fill();SS(iu?'rgba(255,140,180,.9)':'rgba(255,255,255,.5)');ctx.lineWidth=2;ctx.beginPath();ctx.arc(b.x,b.y,b.r-1,0,6.283);ctx.stroke();if(cd>0){FS('rgba(0,0,0,.55)');ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,6.283);ctx.fill()}FS('#fff');FN('800 '+(ia?15:11)+'px "PingFang SC",sans-serif');TA('center');TB('middle');ctx.fillText(b.l,b.x,b.y+1);TB('alphabetic');ctx.restore()}}
-function stZ(){return{x:10,y:H-230,w:200,h:190}}
+function stZ(){var s=Math.min(200,W*.44);return{x:8,y:H-24-s,w:s,h:s}}
 function hPoi(){pointers.forEach(function(p,id){if(p.d)return;if(G.md!=='play'||G.ov){p.d=1;uiC(p.x,p.y);return}
 if(inR({x:W-208,y:8,w:36,h:36},p.x,p.y)){p.d=1;tglP();return}
 var L=btnL(),i,h=null;for(i=0;i<L.length;i++)if(inC(L[i].x,L[i].y,L[i].r+8,p.x,p.y)){h=L[i].id;break}
